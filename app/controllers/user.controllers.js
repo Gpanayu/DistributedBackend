@@ -123,3 +123,48 @@ exports.validateUsername = function(req, res){
     });
   });
 };
+
+exports.getProfile = function(req, res){
+	if(!req.session.user){
+		res.status(403).json({
+			isLogin: false,
+			message: "Not logged in"
+		});
+		return ;
+	}
+	else{
+		var user = req.session.user;
+		User.findOne({
+			username: user.username
+		}).then((usr) => {
+			if(!usr){
+				res.status(404).send({
+					success: false,
+					error: "Cannot find user"
+				});
+				return ;
+			}
+			else{
+				var fields = ["username", "name", "lastOnline",
+				"lastModified", "created_date", "tokenDelete", "picture"];
+				var usr2 = {};
+				for(let i=0;i<fields.length; i++){
+					usr2[fields[i]] = usr[fields[i]];
+					if(i == fields.length-1){
+						res.status(200).json({
+							success: true,
+							message: "Successfully find user",
+							user: usr2
+						});
+					}
+				}
+			}
+		}).catch((err) => {
+			console.log(err);
+			res.status(500).send({
+				success: false,
+				error: "Internal Error"
+			});
+		});
+	}
+};
