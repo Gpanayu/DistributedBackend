@@ -9,12 +9,7 @@ var userSchema = new Schema({
 		trim : true,
 		unique : true,
 		index:true,
-		required:true,
-		validate: [
-			function(name){
-				return /^(?:[aA-zZ]+| |-|[\u0E01-\u0E5B]+|[.])+$/.test(name);
-			}, 'Name must consist of alphabets, whitespaces, periods or hyphens'
-		]
+		required:true
 	},
 	username:{
 		type:String,

@@ -5,7 +5,6 @@ var compression = require('compression');
 var bodyParser = require('body-parser');
 var multer = require('multer');
 var cors = require('cors');
-var passport = require('passport');
 var validator = require('express-validator');
 var session = require('express-session');
 var flash = require('connect-flash');
@@ -13,6 +12,12 @@ var flash = require('connect-flash');
 module.exports = function(){
 
 	var app = express();
+
+	app.use(session({
+		secret: "thereIsNoSecretInTheWorld",
+		resave: false,
+		saveUninitialized: true
+	}));
 
 	// setting environment ---------------------------------------
 	app.use(compression());
@@ -36,8 +41,6 @@ module.exports = function(){
 
  	app.use(flash());
 
- 	app.use(passport.initialize());
-	//app.use(passport.session());  // use express-session
 
   //setting up routing -------------------------------------
 	require('../app/routes/user.routes')(app);
