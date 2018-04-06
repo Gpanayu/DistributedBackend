@@ -7,7 +7,12 @@ module.exports = function(app){
   //   .get(user.getProfile)
   //   .post(user.postProfile);
 
-  //app.post('/user/logout',user.logout);
+
+	app.post('/signup', user.signup);
+	app.post('/login', user.login);
+	app.post('/logout', user.logout);
+
+	app.get('/validate-username', user.validateUsername);
 
 	if(process.env.NODE_ENV === "development"){
 		//list of functions for debug only

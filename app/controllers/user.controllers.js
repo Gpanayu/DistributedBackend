@@ -2,85 +2,124 @@ var User = require('mongoose').model('User');
 var config = require('../../config/config');
 var passport = require('passport');
 var mongoose = require('mongoose');
-var _ = require('lodash');
-var jwt = require('jsonwebtoken');
-var RefreshValidTime = require('../../config/config').refresh_valid_time;
+var bcrypt = require('bcrypt')
 
-exports.render = function(request, response){
-	response.render('user-login',{
-		title: 'Login EventHub',
-		firstName: request.user ? request.user.firstName : '',
-		message: request.flash('error')
-	});
-}
 
-exports.revokeToken = function(request, response){
-	const access_token = request.get("Authorization").split(" ")[1];
-	const refresh_token = request.body.refresh_token;
-	if(!access_token || !refresh_token){
-		response.status(400).json({err:"no token provided"});
-		return;
-	}
-	try{
-		var decoded = jwt.verify(access_token,config.jwtSecret,{ignoreExpiration:true});
-		if(decoded.exp*1000 + RefreshValidTime < new Date().getTime()){
-			throw new Error("token expired");
-		}
-		console.log(decoded);
-	}catch(err){
-		console.error(err);
-		if(err.msg === "token expired")
-			response.status(400).json({err:"token expired"});
-		else response.status(500).json({err:"Something went wrong"});
-		return;
-	}
-	new Promise( (resolve,reject) => {
-		User.findById(decoded.id,(err,user) => {
-			if(err){
-				console.error(new Date().toString());
-				console.error(err);
-				reject({code:500,err:"Internal error"});
-			}
-			else if(!user){
-				console.error(new Date().toString());
-				console.error("revoke token : user not found");
-				reject({code:400,err:"Invalid Token"});
-			}
-			else if(user.refresh_token !== refresh_token){
-				console.error(new Date().toString());
-				console.error("revoke token : invalid refresh token");
-				reject({code:400,err:"Invalid refresh token"});
-			}
-			else if(user.refresh_token_exp < new Date().getTime()){
-				console.error(new Date().toString());
-				console.error("revoke token fail : refresh token expired");
-				let ret = {};
-				ret.err = "refresh token expired";
-				ret.expired = new Date(user.refresh_token_exp);
-				reject({code:403,err:ret});
-			}
-			else resolve(user);
-		});
-	}).then( (user) => {
-		return new Promise( (resolve,reject) => {
-			user.generateToken( (err,rtoken) =>{
-				if(err){
-					resolve({code:500,err:"Internal Error"});
-				}
-				else{
-					resolve({msg:"OK",access_token:rtoken.access_token});
-				}
-			});
-		});
-	}).catch( err => {
-		console.error('error',err);
-		return Promise.resolve(err);
-	}).then( (payload) =>{
-		if(payload.msg === "OK")
-			code = 200;
-		else code = _.get(payload,'code',500);
-		payload = payload ? payload : {"err":"Internal Error"};
-		delete payload.code;
-		response.status(code).json(payload);
-	});
-}
+exports.signup = function(req, res){
+	if (!req.body.username || !req.body.password) {
+    res.status(400).send({
+      success: false,
+      message: 'No username or password defined',
+    });
+  }
+  const saltRounds = 10;
+  bcrypt.hash(req.body.password, saltRounds).then((hash) => {
+    const newUser = new User({
+      username: req.body.username,
+      password: hash,
+			name: req.body.name
+    });
+    return newUser.save();
+  }).then((user) => {
+    console.log('Successfully create new user');
+    req.session.user = {
+      username: user.username,
+			name: user.name
+    };
+    res.status(200).send({
+      success: true,
+      message: 'Successfully register user.',
+      username: user.username,
+			name: user.name
+    });
+  }).catch((err) => {
+    if (err.code === 11000) {
+      res.status(400).send({
+        success: false,
+        message: 'This username already exists',
+      });
+    } else {
+      console.error(err);
+      res.status(400).send({
+        success: false,
+        message: 'Cannot create new user',
+      });
+    }
+  });
+};
+
+exports.login = function(req, res){
+	if (!req.body.username || !req.body.password) {
+    res.status(400).send({
+      success: false,
+      message: 'No username or password defined',
+    });
+  }
+  let user = null;
+  User.findOne({
+    username: req.body.username,
+  }).then((usr) => {
+    user = usr;
+    return bcrypt.compare(req.body.password, user.password);
+  }).then((result) => {
+    if (result) {
+      const {
+        username,
+				name
+      } = user;
+      req.session.user = {
+        username: user.username,
+				name: user.name
+      };
+      res.status(200).json({
+        success: true,
+        user: {
+          username,
+					name
+        },
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid Password',
+      });
+    }
+  }).catch((err) => {
+    console.error(err);
+    res.status(400).send({
+      success: false,
+      message: 'Invalid Password',
+    });
+  });
+};
+
+exports.logout = function(req, res){
+	req.session.destroy();
+  res.status(200).json({
+    success: true,
+    message: 'Successfully Log Out',
+  });
+};
+
+exports.validateUsername = function(req, res){
+	const findingUsername = req.query.username;
+  User.count({
+    username: findingUsername,
+  }).then((count) => {
+    if (count > 0) {
+      res.status(200).json({
+        available: false,
+        username: findingUsername,
+      });
+    } else {
+      res.status(200).json({
+        available: true,
+      });
+    }
+  }).catch((err) => {
+    console.error(err);
+    res.status(500).send({
+      error: 'Internal Error',
+    });
+  });
+};

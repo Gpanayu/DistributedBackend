@@ -33,11 +33,6 @@ var userSchema = new Schema({
 		type:String,
 		required: true
 	},
-	salt:{
-			type: String,
-			required: true,
-			trim: true
-	},
 	picture:{
 		type:String,
 		default:null
@@ -57,42 +52,7 @@ var userSchema = new Schema({
 	lastOnline:{
 		type: Date,
 		default: Date.now
-	},
-// authentication
-	refresh_token: String,
-	refresh_token_exp: Number,
-});
-// do this before save
-userSchema.pre('save',function(next){
-	if(this.password){
-		this.salt = new Buffer(crypto.randomBytes(16).toString('base64'), 'base64');
-		this.password = this.hashPassword(this.password);
 	}
-	next();
 });
-// instance method
-userSchema.methods.hashPassword = function(password){
-	return crypto.pbkdf2Sync(password, this.salt, 10000, 64,'sha512').toString('base64');
-}
-
-userSchema.methods.authenticate = function(password){
-	return this.password === this.hashPassword(password);
-};
-// find the unique username from different OAuth
-userSchema.statics.findUniqueUsername = function(username, suffix, callback){
-	var _this = this;
-	var possibleUsername = username + (suffix || '');
-	_this.findOne({
-		username : possibleUsername
-	}, function(err, user){
-		if(!err){
-			if(!user) callback(possibleUsername);
-			else return _this.findUniqueUsername(username, (suffix || 0) + 1, callback);
-		}
-		else{
-			callback(null);
-		}
-	});
-};
 
 mongoose.model('User',userSchema);

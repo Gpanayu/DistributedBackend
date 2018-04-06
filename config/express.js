@@ -9,7 +9,6 @@ var passport = require('passport');
 var validator = require('express-validator');
 var session = require('express-session');
 var flash = require('connect-flash');
-var Moment = require('moment-timezone');
 
 module.exports = function(){
 
@@ -31,27 +30,14 @@ module.exports = function(){
 
  	//set view engine ------------------------------------------------
  	//use at compile time path relative to server.js
- 	app.set('views','./app/views');
- 	app.set('view engine','jade');
+ 	// app.set('views','./app/views');
+ 	// app.set('view engine','jade');
  	// end set view engine -------------------------------------------
 
  	app.use(flash());
 
  	app.use(passport.initialize());
 	//app.use(passport.session());  // use express-session
-
- 	// require at runtime time path relative to express.js
-
-	app.use(function(request, response, next){
-		passport.authenticate('jwt', {session : false},
-			function(err, user, info){
-				request.authentication_info = info;
-			  if(user){
-					request.user = user;
-				}
-				next();
-			})(request, response);
-	});
 
   //setting up routing -------------------------------------
 	require('../app/routes/user.routes')(app);
