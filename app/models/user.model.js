@@ -32,6 +32,13 @@ var userSchema = new Schema({
 		type:String,
 		default:null
 	},
+	chatRooms: [{
+    roomID: Schema.Types.ObjectId,
+    lastSeenMessage: Schema.Types.ObjectId,
+    isJoin: Boolean,
+    join: [Date],
+    leave: [Date],
+  }],
 	tokenDelete:{
 		type: Boolean,
 		default: false

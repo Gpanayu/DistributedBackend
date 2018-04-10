@@ -33,17 +33,11 @@ module.exports = function(){
 	app.use(express.static('./public'));
  	// end setting environment ---------------------------------------
 
- 	//set view engine ------------------------------------------------
- 	//use at compile time path relative to server.js
- 	// app.set('views','./app/views');
- 	// app.set('view engine','jade');
- 	// end set view engine -------------------------------------------
-
  	app.use(flash());
-
 
   //setting up routing -------------------------------------
 	require('../app/routes/user.routes')(app);
+	require('../app/routes/chatroom.routes')(app);
 	//end setting up routing -------------------------------------
  	app.use(express.static('./public'));
 

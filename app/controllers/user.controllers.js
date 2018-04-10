@@ -145,7 +145,7 @@ exports.getProfile = function(req, res){
 				return ;
 			}
 			else{
-				var fields = ["username", "name", "lastOnline",
+				var fields = ["username", "name", "lastOnline", "chatRooms",
 				"lastModified", "created_date", "tokenDelete", "picture"];
 				var usr2 = {};
 				for(let i=0;i<fields.length; i++){
