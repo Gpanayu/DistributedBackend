@@ -33,10 +33,10 @@ var userSchema = new Schema({
 		default:null
 	},
 	tokenDelete:{
-		type:Boolean,
+		type: Boolean,
 		default: false
 	},
-	created_date:{
+	createdDate:{
 		type: Date,
 		default: Date.now
 	},

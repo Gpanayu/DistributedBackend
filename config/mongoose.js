@@ -12,5 +12,7 @@ module.exports = function(){
 
 	// create collection
 	require('../app/models/user.model');
+	require('../app/models/chatroom.model');
+	require('../app/models/message.model');
 	return db; // database with setting
 }
