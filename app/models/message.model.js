@@ -6,8 +6,7 @@ var chatMessageSchema = new Schema({
   sender: {
     id: Schema.Types.ObjectId,
     username: String,
-    name: String,
-    picture: String
+    name: String
   },
   roomID: Schema.Types.ObjectId,
   createdDate:{
