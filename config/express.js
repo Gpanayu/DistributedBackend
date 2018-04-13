@@ -6,18 +6,14 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var cors = require('cors');
 var validator = require('express-validator');
-var session = require('express-session');
 var flash = require('connect-flash');
+var Session = require('./session').Session;
 
 module.exports = function(){
 
 	var app = express();
 
-	app.use(session({
-		secret: "thereIsNoSecretInTheWorld",
-		resave: false,
-		saveUninitialized: true
-	}));
+	app.use(Session);
 
 	// setting environment ---------------------------------------
 	app.use(compression());

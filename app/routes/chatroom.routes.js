@@ -8,7 +8,12 @@ module.exports = function(app){
 
 	if(process.env.NODE_ENV === "development"){
 		//list of functions for debug only
-
+		app.get('/testsocket', function(req, res){
+				res.sendFile(__dirname + '/index.html');
+		});
+		app.get('/testlogin', function(req, res){
+			res.sendFile(__dirname + '/testlogin.html');
+		});
 	}
 
 }

@@ -57,71 +57,6 @@ exports.newRoom = function(req, res){
   }
 };
 
-var queryChatRoomWithLatestMsg = function(chatroom){
-  return new Promise(function(resolve, reject){
-    Message.findOne({roomID: chatroom.roomID}).sort({ createdDate : -1 }).then(function(msg){
-      let info = {};
-      if(msg){
-        info.latestMsg = {
-          content: msg.content,
-          sender: {
-            username: msg.sender.username,
-            name: msg.sender.name
-          },
-          createdDate: msg.createdDate
-        };
-      }
-      ChatRoom.findOne({_id : chatroom.roomID}, function(err, room){
-        if(err){
-          let e = {};
-          e.code = 500;
-          e.message = "Internal error";
-          e.success = false;
-          reject(e);
-        }
-        else{
-          info.token = room.token;
-          info.picture = room.picture;
-          info.name = room.name;
-          info.tokenDelete = room.tokenDelete;
-          resolve(info);
-        }
-      });
-    }).catch(function(err){
-      let info = {};
-      info.code = 500;
-      info.message = "Internal error";
-      info.success = false;
-      reject(info);
-    });
-  });
-};
-
-var queryChatRoomListWithLatestMsg = function(chatrooms){
-  return new Promise(function(resolve, reject){
-    var info = [];
-    var promises = [];
-    var error;
-    for(let i=0;i<chatrooms.length;i++){
-      promises.push(new Promise(function(resolve, reject){
-        var idx = i;
-        queryChatRoomWithLatestMsg(chatrooms[idx]).then(function(chatroom){
-          info.push(chatroom);
-          resolve();
-        }).catch(function(err){
-          error = err;
-          reject();
-        });
-      }));
-    }
-    Promise.all(promises).then(function(){
-      resolve(info);
-    }).catch(function(){
-      reject(error);
-    });
-  });
-};
-
 exports.getAllRooms = function(req, res){
   if(!req.session.user){
 		res.status(403).json({
@@ -132,8 +67,8 @@ exports.getAllRooms = function(req, res){
 	}
   else{
     var user = req.session.user;
-    queryUserIdFromUsername(user.username).then(function(usr){
-      queryChatRoomListWithLatestMsg(user.chatRooms).then(function(chatrooms){
+    exports.queryUserIdFromUsername(user.username).then(function(usr){
+      exports.queryChatRoomListWithLatestMsg(user.chatRooms).then(function(chatrooms){
         res.status(200).json({
           success: true,
           "chatrooms": chatrooms
@@ -154,9 +89,9 @@ exports.getUsersInRoom = function(req, res){
 
 };
 
-//======internal used functions========
+//============= non-route dependent functions ===============
 
-var queryUserIdFromUsername = function(usrname){
+exports.queryUserIdFromUsername = function(usrname){
   return new Promise(function(resolve, reject){
 		User.findOne({'username' : usrname},function(err, user){
 			if(err) {
@@ -195,7 +130,7 @@ var queryUserIdFromUsernameList = function(arr){
     for(let i=0;i<arr.length;i++){
       promises.push(new Promise(function(resolve, reject){
         var index = i;
-        queryUserIdFromUsername(arr[index])
+        exports.queryUserIdFromUsername(arr[index])
         .then(function(user){
           info.push(user);
           resolve();
@@ -248,6 +183,74 @@ var addChatRoomToUser = function(user, roomID){
       }
     }
   },{ new: true });
+};
+
+var queryChatRoomWithLatestMsg = function(chatroom){
+  return new Promise(function(resolve, reject){
+    Message.findOne({roomID: chatroom.roomID}).sort({ createdDate : -1 }).then(function(msg){
+      let info = {};
+      if(msg){
+        info.latestMsg = {
+          content: msg.content,
+          sender: {
+            username: msg.sender.username,
+            name: msg.sender.name
+          },
+          createdDate: msg.createdDate
+        };
+      }
+      ChatRoom.findOne({_id : chatroom.roomID}, function(err, room){
+        if(err){
+          let e = {};
+          e.code = 500;
+          e.message = "Internal error";
+          e.success = false;
+          reject(e);
+        }
+        else{
+          info.token = room.token;
+          info.picture = room.picture;
+          info.name = room.name;
+          info.tokenDelete = room.tokenDelete;
+          resolve(info);
+        }
+      });
+    }).catch(function(err){
+      let info = {};
+      info.code = 500;
+      info.message = "Internal error";
+      info.success = false;
+      reject(info);
+    });
+  });
+};
+
+exports.queryChatRoomListWithLatestMsg = function(chatrooms){
+  return new Promise(function(resolve, reject){
+    var info = [];
+    var promises = [];
+    var error;
+    if(!chatrooms){
+      chatrooms = [];
+    }
+    for(let i=0;i<chatrooms.length;i++){
+      promises.push(new Promise(function(resolve, reject){
+        var idx = i;
+        queryChatRoomWithLatestMsg(chatrooms[idx]).then(function(chatroom){
+          info.push(chatroom);
+          resolve();
+        }).catch(function(err){
+          error = err;
+          reject();
+        });
+      }));
+    }
+    Promise.all(promises).then(function(){
+      resolve(info);
+    }).catch(function(){
+      reject(error);
+    });
+  });
 };
 
 var randomToken = function(size){

@@ -69,7 +69,9 @@ exports.login = function(req, res){
       } = user;
       req.session.user = {
         username: user.username,
-				name: user.name
+				name: user.name,
+				chatRooms: user.chatRooms,
+				picture: user.picture
       };
       res.status(200).json({
         success: true,

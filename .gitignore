@@ -6,3 +6,5 @@
 *.swp
 node_modules/
 config/env
+app/routes/index.html
+app/routes/testlogin.html
