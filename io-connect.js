@@ -53,54 +53,55 @@ module.exports = function(socket){
     });
 
     socket.on('send', function(data){
-
-    });
-    //
-    // socket.on('send', (data) => {
-    //   const messagePrefab = {
-    //     sender: {},
-    //   }; // message object must follow the Message Schema
-    //   messagePrefab.content = data.content;
-    //   userQuery.getUserFromUsername(data.username).then((user) => {
-    //     messagePrefab.sender.id = user.id;
-    //     messagePrefab.sender.firstName = user.firstName;
-    //     messagePrefab.sender.lastName = user.lastName;
-    //     messagePrefab.sender.username = user.username;
-    //     return chatRoomQuery.getChatroomID(data.room);
-    //   }).then((roomID) => {
-    //     messagePrefab.roomID = roomID;
-    //     const message = new Message(messagePrefab);
-    //     return message.save();
-    //   }).then((msg) => {
-    //     socket.in(data.room).emit('new message', {
-    //       content: msg.content,
-    //       createdTime: msg.createdAt,
-    //       messageID: msg.id,
-    //       room: data.room,
-    //       sender: msg.sender.firstName,
-    //       username: msg.sender.username,
-    //     });
-    //     socket.emit('new message ack', {
-    //       success: true,
-    //       message: {
-    //         content: msg.content,
-    //         createdTime: msg.createdAt,
-    //         messageID: msg.id,
-    //         room: data.room,
-    //         sender: msg.sender.firstName,
-    //         username: msg.sender.username,
-    //       }
-    //     });
-    //   })
-    //     .catch((err) => {
-    //       console.error('Cannot Save Message ', err);
-    //       socket.emit('new message ack', {
-    //         success: false,
-    //         message: data.message,
-    //         room: data.room,
-    //       });
-    //     });
-    // });
+      var msg = {};
+      msg.sender = {};
+      msg.content = data.content;
+      chatRoomController.queryUserIdFromUsername(session.user.username)
+      .then(function(user){
+        msg.sender.id = user._id;
+        msg.sender.username = user.username;
+        msg.sender.name = session.user.name;
+        ChatRoom.findOne( { token : data.room }, function(err, room){
+          if(err || !room){
+            console.log("err in send");
+          }
+          else{
+            msg.sender.roomID = room._id;
+            var message = new Message(msg);
+            message.save().then(function(m){
+              socket.in(data.room).emit('new message', {
+                content: m.content,
+                createdTime: m.createdDate,
+                messageID: m._id,
+                room: data.room,
+                sender: m.sender.name,
+                username: m.sender.username,
+              });
+              socket.emit('new message ack', {
+                success: true,
+                message: {
+                  content: m.content,
+                  createdTime: m.createdDate,
+                  messageID: m._id,
+                  room: data.room,
+                  sender: m.sender.name,
+                  username: m.sender.username,
+                }
+              });
+            }).catch(function(err){
+              console.log("Fail to save message");
+            });
+          }
+        });
+      }).catch(function(err){
+        console.error('Cannot Save Message ', err);
+        socket.emit('new message ack', {
+          success: false,
+          message: data.message,
+          room: data.room,
+        });
+      });
+  });
   });
 };
 
