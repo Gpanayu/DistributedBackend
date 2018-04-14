@@ -23,6 +23,72 @@ module.exports = function(socket){
 
     //other actions for sockets
 
+    socket.on('disconnect', function(){
+      if(!session.user.chatRooms){
+        session.user.chatRooms = [];
+      }
+      for(let i=0;i<session.user.chatRooms.length;i++){
+        console.log('client socket id = '+socket.id+' leaved room token = ' +chatrooms[i].token);
+        socket.leave(session.user.chatRooms[i]);
+      }
+    });
+
+    socket.on('unsubscribe', (rooms) => {
+      rooms.forEach((room) => {
+        console.log('client socket id = '+socket.id+' leaved room token = ' +chatrooms[i].token);
+        socket.leave(room);
+      });
+    });
+
+    socket.on('send', function(data){
+
+    });
+    //
+    // socket.on('send', (data) => {
+    //   const messagePrefab = {
+    //     sender: {},
+    //   }; // message object must follow the Message Schema
+    //   messagePrefab.content = data.content;
+    //   userQuery.getUserFromUsername(data.username).then((user) => {
+    //     messagePrefab.sender.id = user.id;
+    //     messagePrefab.sender.firstName = user.firstName;
+    //     messagePrefab.sender.lastName = user.lastName;
+    //     messagePrefab.sender.username = user.username;
+    //     return chatRoomQuery.getChatroomID(data.room);
+    //   }).then((roomID) => {
+    //     messagePrefab.roomID = roomID;
+    //     const message = new Message(messagePrefab);
+    //     return message.save();
+    //   }).then((msg) => {
+    //     socket.in(data.room).emit('new message', {
+    //       content: msg.content,
+    //       createdTime: msg.createdAt,
+    //       messageID: msg.id,
+    //       room: data.room,
+    //       sender: msg.sender.firstName,
+    //       username: msg.sender.username,
+    //     });
+    //     socket.emit('new message ack', {
+    //       success: true,
+    //       message: {
+    //         content: msg.content,
+    //         createdTime: msg.createdAt,
+    //         messageID: msg.id,
+    //         room: data.room,
+    //         sender: msg.sender.firstName,
+    //         username: msg.sender.username,
+    //       }
+    //     });
+    //   })
+    //     .catch((err) => {
+    //       console.error('Cannot Save Message ', err);
+    //       socket.emit('new message ack', {
+    //         success: false,
+    //         message: data.message,
+    //         room: data.room,
+    //       });
+    //     });
+    // });
   });
 };
 
