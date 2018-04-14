@@ -38,9 +38,6 @@ io.set('authorization', function(handshake, callback){
 });
 
 io.on('connection', ioConnect);
-// io.on('connection', function(socket){
-//   console.log("dis sys spartaa");
-// });
 
 server.listen(config.PORT);
 

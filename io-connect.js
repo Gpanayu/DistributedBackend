@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Session = require('./config/session').Session;
 var Message = mongoose.model('ChatMessage');
+var ChatRoom = mongoose.model('ChatRoom');
 var chatRoomController = require('./app/controllers/chatroom.controllers');
 
 module.exports = function(socket){
@@ -28,8 +29,19 @@ module.exports = function(socket){
         session.user.chatRooms = [];
       }
       for(let i=0;i<session.user.chatRooms.length;i++){
-        console.log('client socket id = '+socket.id+' leaved room token = ' +chatrooms[i].token);
-        socket.leave(session.user.chatRooms[i]);
+        let roomID = session.user.chatRooms[i].roomID;
+        ChatRoom.findById(roomID, function(err, room){
+          if(err){
+            console.log("err in disconnect");
+          }
+          else if(!room){
+            console.log("cannot fine room in disconnect");
+          }
+          else{
+            console.log('client socket id = '+socket.id+' leaved room token = ' +room.token);
+            socket.leave(room.token);
+          }
+        });
       }
     });
 
