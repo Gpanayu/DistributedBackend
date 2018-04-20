@@ -39,7 +39,6 @@ module.exports = function(){
   //setting up routing -------------------------------------
 	require('../app/routes/user.routes')(app);
 	require('../app/routes/chatroom.routes')(app);
-	require('../app/routes/message.routes')(app);
 	//end setting up routing -------------------------------------
  	app.use(express.static('./public'));
 

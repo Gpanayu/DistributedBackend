@@ -51,7 +51,7 @@ module.exports = function(socket){
       }
     });
 
-    socket.on('unsubscribe', (rooms) => {
+    socket.on('unsubscribe', function(rooms){
       for(let i=0;i<rooms.length;i++){
         console.log('client socket id = '+socket.id+' leaved room token = ' +rooms[i].token);
         socket.leave(rooms[i]);
