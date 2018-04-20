@@ -86,7 +86,60 @@ exports.getAllRooms = function(req, res){
 };
 
 exports.getUsersInRoom = function(req, res){
-
+  if(!req.session.user){
+		res.status(403).json({
+			isLogin: false,
+			message: "Not logged in"
+		});
+		return ;
+	}
+  ChatRoom.findOne({ token: req.query.roomToken }, function(err, room){
+    if(err){
+      res.status(err.code).json({
+        success: false,
+        message: err.msg
+      });
+      return;
+    }
+    else if(!room){
+      res.status(200).json({
+        success: true,
+        message: 'Done',
+        users: []
+      });
+    }
+    else{
+      User.find({ chatRooms: { $elemMatch: { roomID: room._id } } }, function(err, users){
+        if(err){
+          res.status(err.code).json({
+            success: false,
+            message: err.msg
+          });
+        }
+        else{
+          var info = [];
+          var promises = [];
+          for(let i=0;i<users.length;i++){
+              promises.push(new Promise(function(resolve, reject){
+                let idx = i;
+                let obj = {};
+                obj.username = users[idx].username;
+                obj.name = users[idx].username;
+                info.push(obj);
+                resolve();
+              }));
+          }
+          Promise.all(promises).then(function(){
+            res.status(200).json({
+              success: true,
+              message: 'Done',
+              users: info
+            });
+          });
+        }
+      });
+    }
+  });
 };
 
 //============= non-route dependent functions ===============
@@ -176,10 +229,7 @@ var addChatRoomToUser = function(user, roomID){
     $push: {
       chatRooms: {
         roomID,
-        lastSeenMessage: null,
-        isJoin: true,
-        join: [].push(Date.now()),
-        leave: [],
+        lastSeenMessage: null
       }
     }
   },{ new: true });

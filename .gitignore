@@ -8,3 +8,5 @@ node_modules/
 config/env
 app/routes/testsocket.html
 app/routes/testlogin.html
+app/routes/testjoin.html
+app/routes/testleave.html

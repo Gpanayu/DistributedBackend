@@ -14,6 +14,12 @@ module.exports = function(app){
 		app.get('/testlogin', function(req, res){
 			res.sendFile(__dirname + '/testlogin.html');
 		});
+		app.get('/testjoin', function(req, res){
+			res.sendFile(__dirname + '/testjoin.html');
+		});
+		app.get('/testleave', function(req, res){
+			res.sendFile(__dirname + '/testleave.html');
+		});
 	}
 
 }

@@ -34,10 +34,7 @@ var userSchema = new Schema({
 	},
 	chatRooms: [{
     roomID: Schema.Types.ObjectId,
-    lastSeenMessage: Schema.Types.ObjectId,
-    isJoin: Boolean,
-    join: [Date],
-    leave: [Date],
+    lastSeenMessage: Schema.Types.ObjectId
   }],
 	tokenDelete:{
 		type: Boolean,
@@ -48,10 +45,6 @@ var userSchema = new Schema({
 		default: Date.now
 	},
 	lastModified:{
-		type: Date,
-		default: Date.now
-	},
-	lastOnline:{
 		type: Date,
 		default: Date.now
 	}
