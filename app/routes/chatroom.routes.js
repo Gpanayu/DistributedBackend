@@ -20,6 +20,9 @@ module.exports = function(app){
 		app.get('/testleave', function(req, res){
 			res.sendFile(__dirname + '/testleave.html');
 		});
+		app.get('/testread', function(req, res){
+			res.sendFile(__dirname + '/testread.html');
+		});
 	}
 
 }

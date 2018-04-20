@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
 var Session = require('./config/session').Session;
 var Message = mongoose.model('ChatMessage');
 var ChatRoom = mongoose.model('ChatRoom');
@@ -76,7 +75,7 @@ module.exports = function(socket){
             });
           }
           else{
-            msg.sender.roomID = room._id;
+            msg.roomID = room._id;
             var message = new Message(msg);
             message.save().then(function(m){
               socket.in(data.room).emit('new message', {
@@ -104,7 +103,7 @@ module.exports = function(socket){
     });
 
     socket.on('read', function(data){
-      data.messageID = ObjectId(data.messageID);
+      data.messageID = mongoose.Types.ObjectId(data.messageID);
       ChatRoom.findOne({ token: data.room }, function(err, room){
         if(err){
           console.log("err in read");
@@ -124,12 +123,13 @@ module.exports = function(socket){
         var ts = Date.now();
         User.findOneAndUpdate({ username: data.username, 'chatRooms.roomID': roomID }, {
           $set: {
-            'chatRooms.lastSeenMessage': data.messageID,
-            lastModified: ts
+            'chatRooms.$.lastSeenMessage': data.messageID
            }
         }, { new: true }, function(err, user){
             if(err){
               console.log("err in read");
+              console.log(err.code);
+              console.log(err.message);
               socket.emit('err', {
                 msg: 'err in read'
               });
@@ -141,17 +141,26 @@ module.exports = function(socket){
               });
             }
             else{
-              socket.emit('read ack', {
-                timestamp: user.lastModified,
-                messageID: data.messageID,
-                roomToken: data.room,
-              });
               socket.to(data.room).emit('seen', {
                 timestamp: user.lastModified,
                 messageID: data.messageID,
                 username: user.username,
                 nameOfUser: user.name,
                 roomToken: data.room,
+              });
+              User.findOneAndUpdate({ username: data.username }, {
+                $set: {
+                  lastModified: ts
+                }
+              }, {new: true}, function(err, updatedUser){
+                if(err){
+                  console.log("err in read special");
+                  console.log(err.code);
+                  console.log(err.message);
+                }
+                else if(!updatedUser){
+                  console.log("no user in read special");
+                }
               });
             }
         });
@@ -252,7 +261,7 @@ module.exports = function(socket){
             }
             else{
               socket.leave(roomToken);
-              socket.to(roomToken).emit('member left', {
+              socket.to(roomToken).emit('left', {
                 username: user.username,
                 name: user.name,
                 timestamp: ts
