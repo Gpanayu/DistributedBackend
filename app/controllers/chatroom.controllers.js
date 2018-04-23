@@ -15,7 +15,7 @@ exports.getAllRooms = function(req, res){
   else{
     var user = req.session.user;
     exports.queryUserIdFromUsername(user.username).then(function(usr){
-      exports.queryChatRoomListWithLatestMsg(user.chatRooms).then(function(chatrooms){
+      exports.queryChatRoomListWithLatestMsg(usr.chatRooms).then(function(chatrooms){
         res.status(200).json({
           success: true,
           "chatrooms": chatrooms
@@ -238,6 +238,7 @@ exports.queryUserIdFromUsername = function(usrname){
         if(!user['tokenDelete']){
           info['_id'] = user['_id'];
           info['username'] = user['username'];
+          info['chatRooms'] = user['chatRooms'];
           resolve(info);
         }
         else{

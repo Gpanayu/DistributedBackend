@@ -1,6 +1,5 @@
 var User = require('mongoose').model('User');
 var config = require('../../config/config');
-var passport = require('passport');
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt')
 
