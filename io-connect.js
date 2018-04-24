@@ -51,11 +51,12 @@ module.exports = function(socket){
       }
     });
 
-    socket.on('unsubscribe', function(rooms){
-      for(let i=0;i<rooms.length;i++){
-        console.log('client socket id = '+socket.id+' leaved room token = ' +rooms[i].token);
-        socket.leave(rooms[i]);
-      }
+    socket.on('unsubscribe', function(data){
+      socket.leave(data.token);
+      // for(let i=0;i<rooms.length;i++){
+      //   console.log('client socket id = '+socket.id+' leaved room token = ' +rooms[i].token);
+      //   socket.leave(rooms[i]);
+      // }
     });
 
     socket.on('send', function(data){
@@ -79,6 +80,14 @@ module.exports = function(socket){
             var message = new Message(msg);
             message.save().then(function(m){
               socket.in(data.room).emit('new message', {
+                content: m.content,
+                createdTime: m.createdDate,
+                messageID: m._id,
+                room: data.room,
+                sender: m.sender.name,
+                username: m.sender.username,
+              });
+              socket.emit('new message', {
                 content: m.content,
                 createdTime: m.createdDate,
                 messageID: m._id,
