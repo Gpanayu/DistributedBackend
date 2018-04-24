@@ -1,6 +1,5 @@
 var session = require('express-session');
-var MongoStore = require('connect-mongostore')(session);
-var mongoose = require('mongoose');
+var MongoStore = require('connect-mongo')(session);
 var config = require('./config');
 
 module.exports = {
@@ -8,9 +7,8 @@ module.exports = {
     secret: "thereIsNoSecretInTheWorld",
   	resave: false,
   	saveUninitialized: true,
-    // store: new MongoStore({
-    //   'db': mongoose.connection.db,
-    //   'mongooseConnection': mongoose.connection
-    // })
+    store: new MongoStore({
+      url: 'mongodb://localhost/dissys'
+    })
   })
 };

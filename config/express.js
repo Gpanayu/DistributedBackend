@@ -8,12 +8,21 @@ var cors = require('cors');
 var validator = require('express-validator');
 var flash = require('connect-flash');
 var Session = require('./session').Session;
+var mongoose = require('mongoose');
+// var session = require('express-session');
+// var MongoStore = require('connect-mongo')(session);
 
 module.exports = function(){
 
 	var app = express();
 
 	app.use(Session);
+	// app.use(session({
+	// 	secret: "thereIsNoSecretInTheWorld",
+	// 	resave: false,
+  // 	saveUninitialized: true,
+	// 	store: new MongoStore({ url: 'mongodb://localhost/dissys' })
+	// }));
 
 	// setting environment ---------------------------------------
 	app.use(compression());
