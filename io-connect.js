@@ -53,10 +53,12 @@ module.exports = function(socket){
 
     socket.on('unsubscribe', function(data){
       socket.leave(data.token);
-      // for(let i=0;i<rooms.length;i++){
-      //   console.log('client socket id = '+socket.id+' leaved room token = ' +rooms[i].token);
-      //   socket.leave(rooms[i]);
-      // }
+    });
+
+    socket.on('subscribe', function(data){
+      //This is not quite a good practice.
+      //Should be modified in the future.
+      socket.join(data.token);
     });
 
     socket.on('send', function(data){
