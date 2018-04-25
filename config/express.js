@@ -45,6 +45,8 @@ module.exports = function(){
 	  next();
 	});
 
+	app.use('/healthcheck', require('express-healthcheck')());
+
   //setting up routing -------------------------------------
 	require('../app/routes/user.routes')(app);
 	require('../app/routes/chatroom.routes')(app);
