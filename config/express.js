@@ -52,7 +52,7 @@ module.exports = function(){
 	require('../app/routes/chatroom.routes')(app);
 	//end setting up routing -------------------------------------
  	app.use(express.static('./public'));
-
+	
 
 	return app;
 }

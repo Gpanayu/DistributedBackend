@@ -3,12 +3,14 @@ var ChatRoom = mongoose.model('ChatRoom');
 var User = mongoose.model('User');
 var Message = mongoose.model('ChatMessage');
 var crypto = require('crypto');
+var config = require('../../config/config');
 
 exports.getAllRooms = function(req, res){
   if(!req.session.user){
 		res.status(403).json({
 			isLogin: false,
-			message: "Not logged in"
+			message: "Not logged in",
+      host: config.URL
 		});
 		return ;
 	}
@@ -18,7 +20,8 @@ exports.getAllRooms = function(req, res){
       exports.queryChatRoomListWithLatestMsg(usr.chatRooms).then(function(chatrooms){
         res.status(200).json({
           success: true,
-          "chatrooms": chatrooms
+          "chatrooms": chatrooms,
+          host: config.URL
         });
       }).catch(function(err){
         res.status(err.code).json(err);
@@ -26,7 +29,8 @@ exports.getAllRooms = function(req, res){
     }).catch(function(err){
       res.status(err.code).json({
         success: false,
-        message: err.msg
+        message: err.msg,
+        host: config.URL
       });
     });
   }
@@ -36,7 +40,8 @@ exports.getUsersInRoom = function(req, res){
   if(!req.session.user){
 		res.status(403).json({
 			isLogin: false,
-			message: "Not logged in"
+			message: "Not logged in",
+      host: config.URL
 		});
 		return ;
 	}
@@ -44,7 +49,8 @@ exports.getUsersInRoom = function(req, res){
     if(err){
       res.status(err.code).json({
         success: false,
-        message: err.msg
+        message: err.msg,
+        host: config.URL
       });
       return;
     }
@@ -52,7 +58,8 @@ exports.getUsersInRoom = function(req, res){
       res.status(200).json({
         success: true,
         message: 'Done',
-        users: []
+        users: [],
+        host: config.URL
       });
     }
     else{
@@ -60,7 +67,8 @@ exports.getUsersInRoom = function(req, res){
         if(err){
           res.status(err.code).json({
             success: false,
-            message: err.msg
+            message: err.msg,
+            host: config.URL
           });
         }
         else{
@@ -80,7 +88,8 @@ exports.getUsersInRoom = function(req, res){
             res.status(200).json({
               success: true,
               message: 'Done',
-              users: info
+              users: info,
+              host: config.URL
             });
           });
         }
@@ -93,7 +102,8 @@ exports.getMessages = function(req, res){
   if(!req.session.user){
 		res.status(403).json({
 			isLogin: false,
-			message: "Not logged in"
+			message: "Not logged in",
+      host: config.URL
 		});
 		return ;
 	}
@@ -109,14 +119,16 @@ exports.getMessages = function(req, res){
           if(err){
             res.status(err.code).json({
               success: false,
-              message: err.msg
+              message: err.msg,
+              host: config.URL
             });
             return;
           }
           else if (!room){
             res.status(404).json({
               success: false,
-              message: 'Cannot find room'
+              message: 'Cannot find room',
+              host: config.URL
             });
           }
           else{
@@ -138,21 +150,24 @@ exports.getMessages = function(req, res){
               if(!lastSeenMessage && !flag){
                 res.status(403).json({
                   success: false,
-                  message: 'Data not available'
+                  message: 'Data not available',
+                  host: config.URL
                 });
               }
               else{
                 res.status(200).json({
                   success: true,
                   messages: msgs,
-                  lastSeenMessage: lastSeenMessage
+                  lastSeenMessage: lastSeenMessage,
+                  host: config.URL
                 });
               }
             }).catch(function(err){
               console.log(err);
               res.status(500).json({
                 success: false,
-                message: 'Internal error'
+                message: 'Internal error',
+                host: config.URL
               });
             });
           }
@@ -166,7 +181,8 @@ exports.newRoom = function(req, res){
   if(!req.session.user){
 		res.status(403).json({
 			isLogin: false,
-			message: "Not logged in"
+			message: "Not logged in",
+      host: config.URL
 		});
 		return ;
 	}
@@ -189,27 +205,31 @@ exports.newRoom = function(req, res){
             res.status(200).json({
               success: true,
               message: 'Create new chatroom succeeded',
-              roomToken: room.token
+              roomToken: room.token,
+              host: config.URL
             });
           })
           .catch(function(){
             res.status(500).send({
               success: false,
-              error: 'Error in adding chatroom into users'
+              error: 'Error in adding chatroom into users',
+              host: config.URL
             });
           });
         }).catch(function(err){
           console.log("Fail to save chatroom");
           res.status(500).send({
             success: false,
-            error: 'Fail to save chatroom'
+            error: 'Fail to save chatroom',
+            host: config.URL
           });
         });
       });
     }).catch(function(){
       res.status(500).send({
         success: false,
-        error: 'Internal error'
+        error: 'Internal error',
+        host: config.URL
       });
     });
   }

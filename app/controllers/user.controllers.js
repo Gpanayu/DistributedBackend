@@ -8,6 +8,7 @@ exports.login = function(req, res){
     res.status(400).send({
       success: false,
       message: 'No username or password defined',
+			host: config.URL
     });
   }
   let user = null;
@@ -34,11 +35,13 @@ exports.login = function(req, res){
           username,
 					name
         },
+				host: config.URL
       });
     } else {
       res.status(400).json({
         success: false,
         message: 'Invalid Password',
+				host: config.URL
       });
     }
   }).catch(function(err){
@@ -46,6 +49,7 @@ exports.login = function(req, res){
     res.status(400).send({
       success: false,
       message: 'Invalid Password',
+			host: config.URL
     });
   });
 };
@@ -55,6 +59,7 @@ exports.signup = function(req, res){
     res.status(400).send({
       success: false,
       message: 'No username or password defined',
+			host: config.URL
     });
   }
   const saltRounds = 10;
@@ -75,19 +80,22 @@ exports.signup = function(req, res){
       success: true,
       message: 'Successfully register user.',
       username: user.username,
-			name: user.name
+			name: user.name,
+			host: config.URL
     });
   }).catch(function(err){
     if (err.code == 11000) {
       res.status(400).send({
         success: false,
         message: 'This username already exists',
+				host: config.URL
       });
     } else {
       console.error(err);
       res.status(400).send({
         success: false,
         message: 'Cannot create new user',
+				host: config.URL
       });
     }
   });
@@ -98,6 +106,7 @@ exports.logout = function(req, res){
   res.status(200).json({
     success: true,
     message: 'Successfully Log Out',
+		host: config.URL
   });
 };
 
@@ -109,16 +118,19 @@ exports.validateUsername = function(req, res){
       res.status(200).json({
         available: false,
         username: req.query.username,
+				host: config.URL
       });
     } else {
       res.status(200).json({
         available: true,
+				host: config.URL
       });
     }
   }).catch(function(err){
     console.error(err);
     res.status(500).send({
       error: 'Internal Error',
+			host: config.URL
     });
   });
 };
@@ -127,7 +139,8 @@ exports.getProfile = function(req, res){
 	if(!req.session.user){
 		res.status(403).json({
 			isLogin: false,
-			message: "Not logged in"
+			message: "Not logged in",
+			host: config.URL
 		});
 		return ;
 	}
@@ -139,7 +152,8 @@ exports.getProfile = function(req, res){
 			if(!usr){
 				res.status(404).send({
 					success: false,
-					error: "Cannot find user"
+					error: "Cannot find user",
+					host: config.URL
 				});
 				return ;
 			}
@@ -153,7 +167,8 @@ exports.getProfile = function(req, res){
 						res.status(200).json({
 							success: true,
 							message: "Successfully find user",
-							user: usr2
+							user: usr2,
+							host: config.URL
 						});
 					}
 				}
@@ -162,7 +177,8 @@ exports.getProfile = function(req, res){
 			console.log(err);
 			res.status(500).send({
 				success: false,
-				error: "Internal Error"
+				error: "Internal Error",
+				host: config.URL
 			});
 		});
 	}
